@@ -1,7 +1,7 @@
-import { isValidArray, parseJson } from "../../utils/common";
+import { parseJson } from "../../utils/common";
 import logger from "../../utils/logger";
 import ProcessRequestValidator from "./validator/validater";
-import { CreateDevice, CreateConnection } from "./service";
+import { CreateDevice, CreateConnection, FetchRouteInfo } from "./service";
 import { adjacencyList } from "./model";
 
 const ProcessController = async (req, res) => {
@@ -21,7 +21,7 @@ const ProcessController = async (req, res) => {
       requestRoute,
       requestData,
     });
-    if (!isValid) return { status, message };
+    if (!isValid) res.status(status).json({ msg: message });
     if (requestMethod === "CREATE") {
       if (requestRoute === "/devices") {
         return CreateDevice(requestData, res);
@@ -38,6 +38,9 @@ const ProcessController = async (req, res) => {
             type: x.startsWith("R") ? "REPEATER" : "COMPUTER",
           })),
         });
+      }
+      if (requestRoute.startsWith("/info-routes")) {
+        return FetchRouteInfo(requestRoute, res);
       }
     }
   } catch (error) {

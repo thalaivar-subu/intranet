@@ -4,18 +4,20 @@ const ALLOWED_DEVICE_TYPES = ["COMPUTER", "REPEATER"];
 const validateCreate = (requestRoute, requestData) => {
   let validationResult = { isValid: true };
   if (requestRoute === "/devices") {
-    if (
-      !isValidObject(requestData) ||
-      !(
-        requestData.type &&
-        ALLOWED_DEVICE_TYPES.find((x) => requestData.type === x)
-      ) ||
-      !requestData.name
-    ) {
+    if (!isValidObject(requestData) || !requestData.name) {
       validationResult = {
         isValid: false,
         status: 400,
         message: "Invalid Command.",
+      };
+    }
+    if (
+      !(requestData.type && ALLOWED_DEVICE_TYPES.includes(requestData.type))
+    ) {
+      validationResult = {
+        isValid: false,
+        status: 400,
+        message: `type '${requestData.type}' is not supported`,
       };
     }
   }
@@ -30,7 +32,7 @@ const validateCreate = (requestRoute, requestData) => {
       validationResult = {
         isValid: false,
         status: 400,
-        message: "Invalid Command Syntax.",
+        message: "Invalid command syntax",
       };
     }
   }

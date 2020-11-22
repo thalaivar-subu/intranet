@@ -4,8 +4,8 @@ const addNode = (v) => {
   adjacencyList.set(v, []);
 };
 const addEdge = (from, to) => {
-  adjacencyList.get(from).push(to);
-  adjacencyList.get(to).push(from);
+  if (!adjacencyList.get(from).includes(to)) adjacencyList.get(from).push(to);
+  if (!adjacencyList.get(to).includes(from)) adjacencyList.get(to).push(from);
 };
 const removeNode = (v) => {
   // deleting node from list
@@ -22,10 +22,13 @@ const removeNode = (v) => {
 };
 const depthFirstSearch = (start, nodeToFind) => {
   visited.add(start);
+  if (start === nodeToFind) {
+    return { nodeToFind, visited };
+  }
   const destinations = adjacencyList.get(start);
   for (const destination of destinations) {
     if (destination === nodeToFind) {
-      console.log(`Found -> ${nodeToFind}`, visited);
+      return { nodeToFind, visited };
     }
     if (!visited.has(destination)) {
       depthFirstSearch(destination, nodeToFind);
