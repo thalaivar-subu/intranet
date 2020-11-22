@@ -1,7 +1,6 @@
 import { LOGPATH, NODE_ENV, LOG_FILE_NAME, APP_NAME } from "../lib/constants";
 import { transports, format, createLogger } from "winston";
 import { mkdirSync, existsSync } from "fs";
-import { get } from "express-http-context";
 import safeStringify from "fast-safe-stringify";
 import { isValidObject } from "../utils/common";
 
@@ -11,12 +10,8 @@ const { printf, combine, timestamp, label } = format;
 const logCustomFormat = printf(
   ({ level, message, label, timestamp, stack, ...info }) => {
     const logContent = { timestamp, label, message };
-    const reqId = get("reqId");
-    const requestBody = get("requestBody");
-    if (reqId) logContent.reqId = reqId;
     if (isValidObject(info)) logContent.info = info;
     if (level === "error") {
-      if (requestBody) logContent.requestBody = requestBody;
       if (stack) logContent.stack = stack;
     }
     return safeStringify(logContent);

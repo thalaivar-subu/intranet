@@ -2,12 +2,10 @@
 import logEventErrors from "./utils/eventerrors";
 import express from "express";
 import morgan from "morgan";
-import { parseJson } from "./utils/common";
-import uniqid from "uniqid";
-import { middleware, set } from "express-http-context";
 import logger from "./utils/logger";
 import { APP_NAME, PORT } from "./lib/constants";
 import Routes from "./API/routes";
+import bodyParser from "./utils/bodyparser";
 
 const app = express();
 
@@ -26,19 +24,7 @@ app.use(
   })
 );
 
-
-app.use(express.urlencoded({ limit: "256kb", extended: true }));
-app.use(express.json({ limit: "256kb" }));
-app.use(middleware);
-
-// Sets Uniqid in context
-app.use((req, res, next) => {
-  const { headers: { context } = {}, body } = req;
-  const { uniqId = uniqid() } = parseJson(context);
-  set("reqId", uniqId);
-  set("requestBody", body);
-  next();
-});
+app.use(bodyParser);
 
 // Healtcheck End point
 app.get("/", (req, res) => {

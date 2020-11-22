@@ -1,10 +1,10 @@
-import { isValidObject } from "../../utils/common";
-import logger from "../../utils/logger";
+import logger from "../../../utils/logger";
+import validateCreate from "./create";
+import validateFetch from "./fetch";
 
 const ALLOWED_METHODS = ["CREATE", "FETCH", "MODIFY"];
 const ALLOWED_ROUTES = ["/connections", "/devices", "/info-routes"];
 const ALLOWED_CONTENT_TYPES = ["application/json"];
-const ALLOWED_DEVICE_TYPES = ["COMPUTER", "REPEATER"];
 
 const ProcessRequestValidator = ({
   requestMethod,
@@ -26,21 +26,11 @@ const ProcessRequestValidator = ({
         message: `Invalid Command`,
       };
     }
-    if (requestMethod === "CREATE" && requestRoute === "/devices") {
-      if (
-        !isValidObject(requestData) ||
-        !(
-          requestData.type &&
-          ALLOWED_DEVICE_TYPES.find((x) => requestData.type === x)
-        ) ||
-        !requestData.name
-      ) {
-        validationResult = {
-          isValid: false,
-          status: 400,
-          message: "Invalid Command.",
-        };
-      }
+    switch (requestMethod) {
+      case "CREATE":
+        return validateCreate(requestRoute, requestData);
+      case "FETCH":
+        return validateFetch(requestRoute, requestData);
     }
     return validationResult;
   } catch (error) {
