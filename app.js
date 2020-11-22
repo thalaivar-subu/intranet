@@ -6,7 +6,8 @@ import { parseJson } from "./utils/common";
 import uniqid from "uniqid";
 import { middleware, set } from "express-http-context";
 import logger from "./utils/logger";
-import { APP_NAME, PORT, NODE_ENV } from "./lib/constants";
+import { APP_NAME, PORT } from "./lib/constants";
+import Routes from "./API/routes";
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use(
   })
 );
 
-// Body Parsers
+
 app.use(express.urlencoded({ limit: "256kb", extended: true }));
 app.use(express.json({ limit: "256kb" }));
 app.use(middleware);
@@ -41,8 +42,10 @@ app.use((req, res, next) => {
 
 // Healtcheck End point
 app.get("/", (req, res) => {
-  res.status(200).send({ message: "I am Alive" });
+  res.status(200).json({ message: "I am Alive" });
 });
+
+Routes(app);
 
 // App Listens
 app.listen(PORT, () => {
