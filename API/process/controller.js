@@ -5,6 +5,7 @@ import { CreateDevice, CreateConnection, FetchRouteInfo } from "./service";
 import { adjacencyList } from "./model";
 
 const ProcessController = async (req, res) => {
+  let response = {};
   try {
     const requestParams = req.body ? req.body.split("\n") : [];
     const [
@@ -21,31 +22,45 @@ const ProcessController = async (req, res) => {
       requestRoute,
       requestData,
     });
-    if (!isValid) res.status(status).json({ msg: message });
-    if (requestMethod === "CREATE") {
-      if (requestRoute === "/devices") {
-        return CreateDevice(requestData, res);
+    if (!isValid) {
+      response = {
+        status,
+        msg: message,
+      };
+    } else {
+      if (requestMethod === "CREATE") {
+        if (requestRoute === "/devices") {
+          response = CreateDevice(requestData);
+        }
+        if (requestRoute === "/connections") {
+          response = CreateConnection(requestData);
+        }
       }
-      if (requestRoute === "/connections") {
-        return CreateConnection(requestData, res);
-      }
-    }
-    if (requestMethod === "FETCH") {
-      if (requestRoute === "/devices") {
-        return res.status(200).json({
-          devices: Array.from(adjacencyList.keys(), (x) => ({
-            name: x,
-            type: x.startsWith("R") ? "REPEATER" : "COMPUTER",
-          })),
-        });
-      }
-      if (requestRoute.startsWith("/info-routes")) {
-        return FetchRouteInfo(requestRoute, res);
+      if (requestMethod === "FETCH") {
+        if (requestRoute === "/devices") {
+          response = {
+            status: 200,
+            devices: Array.from(adjacencyList.keys(), (x) => ({
+              name: x,
+              type: x.startsWith("R") ? "REPEATER" : "COMPUTER",
+            })),
+          };
+        }
+        if (requestRoute.startsWith("/info-routes")) {
+          response = FetchRouteInfo(requestRoute);
+        }
       }
     }
   } catch (error) {
     logger.error("Error in Process Controller -> ", error);
-    res.status(500).json({ msg: "Internal Server Error" });
+    response = {
+      status: 500,
+      msg: "Internal Server Error",
+    };
+  }
+  if (response.msg) res.status(response.status).json({ msg: response.msg });
+  else if (response.devices) {
+    res.status(response.status).json({ devices: response.devices });
   }
 };
 

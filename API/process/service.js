@@ -1,58 +1,83 @@
+import { isValidObject } from "../../utils/common";
 import logger from "../../utils/logger";
-import { addEdge, addNode, adjacencyList, depthFirstSearch } from "./model";
+import { addEdge, addNode, adjacencyList, getRoute } from "./model";
 
-const CreateDevice = async ({ type, name }, res) => {
-  logger.info("Create Device Params -> ", { type, name });
+const CreateDevice = ({ type, name }) => {
+  let response = {};
   try {
     if (adjacencyList.has(name)) {
-      res.status(400).json({ msg: `Device '${name}' already exists` });
-      return;
+      response = {
+        status: 400,
+        msg: `Device '${name}' already exists`,
+      };
     } else {
       addNode(name);
-      res.status(200).json({ msg: `Successfully added ${name}` });
-      return;
+      response = {
+        status: 200,
+        msg: `Successfully added ${name}`,
+      };
     }
   } catch (error) {
     logger.error("Error while creating device", error);
-    res.status(500);
-    return;
+    response = {
+      status: 500,
+      msg: "Internal Server Error",
+    };
   }
+  return response;
 };
 
-const CreateConnection = async ({ source, targets }, res) => {
-  logger.info("Create Connection Params -> ", { source, targets });
+const CreateConnection = ({ source, targets }) => {
+  let response = {};
   try {
     if (!adjacencyList.has(source)) {
-      res.status(400).json({ msg: `Node '${source}' not found` });
-      return;
+      response = {
+        status: 400,
+        msg: `Node '${source}' not found`,
+      };
+    } else {
+      targets.map((x) => {
+        if (!adjacencyList.has(x)) {
+          response = {
+            status: 400,
+            msg: `Target '${x}' not found`,
+          };
+        }
+        if (adjacencyList.get(source).includes(x)) {
+          response = {
+            status: 400,
+            msg: "Devices are already connected",
+          };
+        }
+        if (x === source) {
+          response = {
+            status: 400,
+            msg: "Cannot connect device to itself",
+          };
+        }
+      });
+      targets.map((x) => {
+        addEdge(source, x);
+      });
     }
-    targets.map((x) => {
-      if (!adjacencyList.has(x)) {
-        res.status(400).json({ msg: `Target '${x}' not found` });
-        return;
-      }
-      if (adjacencyList.get(source).includes(x)) {
-        res.status(400).json({ msg: "Devices are already connected" });
-        return;
-      }
-      if (x === source) {
-        res.status(400).json({ msg: "Cannot connect device to itself" });
-        return;
-      }
-    });
-    targets.map((x) => {
-      addEdge(source, x);
-    });
-    res.status(200).json({ msg: "Successfully connected" });
-    return;
+    if (!isValidObject(response)) {
+      response = {
+        status: 200,
+        msg: "Successfully connected",
+      };
+    }
   } catch (error) {
     logger.error("Error while creating Connection", error);
-    res.status(500);
-    return;
+    response = {
+      status: 500,
+      msg: "Internal Server Error",
+    };
   }
+  return response;
 };
 
-const FetchRouteInfo = async (requestRoute, res) => {
+const FetchRouteInfo = (requestRoute) => {
+  let response = {};
   try {
     const queryString = requestRoute.replace("/info-routes?", "");
     const queryParams = queryString.split("&");
@@ -63,29 +88,41 @@ const FetchRouteInfo = async (requestRoute, res) => {
     });
     const { from, to } = queryParamMap;
     if (!adjacencyList.has(from)) {
-      res.status(400).json({ msg: `Node '${from}' not found` });
-      return;
+      response = {
+        status: 400,
+        msg: `Node '${from}' not found`,
+      };
+    } else if (!adjacencyList.has(to)) {
+      response = {
+        status: 400,
+        msg: `Node '${to}' not found`,
+      };
+    } else if (from.startsWith("R") || to.startsWith("R")) {
+      response = {
+        status: 200,
+        msg: "Route cannot be calculated with repeater",
+      };
+    } else {
+      const Route = getRoute(from, to);
+      logger.info({ Route, from, to, msg: `Route is ${Route}` });
+      if (Route) {
+        response = {
+          status: 200,
+          msg: `Route is ${Route}`,
+        };
+      } else {
+        response = {
+          status: 404,
+          msg: "Route not found",
+        };
+      }
     }
-    if (!adjacencyList.has(to)) {
-      res.status(400).json({ msg: `Node '${to}' not found` });
-      return;
-    }
-    if (from.startsWith("R") || to.startsWith("R")) {
-      res.status(400).json({ msg: "Route cannot be calculated with repeater" });
-      return;
-    }
-    const { visited = [], nodeToFind = "" } = depthFirstSearch(from, to) || {};
-    if (nodeToFind) {
-      res.status(200).json({ msg: `Route is ${visited.join("->")}` });
-      return;
-    }
-    res.status(404).json({ msg: "Route not found" });
-    return;
   } catch (error) {
     logger.error("Error while fetching route info", error);
-    res.status(500);
-    return;
+    response = { status: 500, msg: "Internal Server Error" };
   }
+  logger.info({ response });
+  return response;
 };
 
 export { CreateDevice, CreateConnection, FetchRouteInfo };

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "start-dev": "nodemon index.js",
-    "test": "start-server-and-test 'NODE_ENV=test node index.js' 8081 'jest --coverage --verbose false'",
+    "test": "start-server-and-test 'NODE_ENV=test node index.js' 8081 'jest --coverage --verbose'",
     "lint": "npx eslint . --ext .js",
     "lint-fix": "npx eslint . --ext .js --fix",
     "prettify": "npx prettier . --ext.js --write"

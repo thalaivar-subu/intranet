@@ -1,5 +1,7 @@
+import { isValidArray } from "../../utils/common";
+import logger from "../../utils/logger";
+
 const adjacencyList = new Map();
-const visited = new Set();
 const addNode = (v) => {
   adjacencyList.set(v, []);
 };
@@ -7,33 +9,64 @@ const addEdge = (from, to) => {
   if (!adjacencyList.get(from).includes(to)) adjacencyList.get(from).push(to);
   if (!adjacencyList.get(to).includes(from)) adjacencyList.get(to).push(from);
 };
-const removeNode = (v) => {
-  // deleting node from list
-  adjacencyList.delete(v);
-
-  // Remove Edges of the node
-  for (let [key, value] of adjacencyList.entries()) {
-    const index = value.indexOf(v);
-    if (index >= 0) {
-      const splicedValue = value.filter((x) => x !== v);
-      adjacencyList.set(key, splicedValue);
-    }
-  }
-};
-const depthFirstSearch = (start, nodeToFind) => {
+const depthFirstSearch = (start, nodeToFind, visited = new Set()) => {
   visited.add(start);
-  if (start === nodeToFind) {
-    return { nodeToFind, visited };
-  }
   const destinations = adjacencyList.get(start);
   for (const destination of destinations) {
     if (destination === nodeToFind) {
+      visited.add(nodeToFind);
       return { nodeToFind, visited };
     }
     if (!visited.has(destination)) {
-      depthFirstSearch(destination, nodeToFind);
+      const isFound = depthFirstSearch(destination, nodeToFind, visited);
+      if (isFound) return isFound;
     }
   }
+  return {};
+};
+const findAllPosibleRoutes = (start, end) => {
+  const possibleCombinations = [];
+  const connections = adjacencyList.get(start);
+  if (start === end || connections.includes(end)) {
+    return [[start, end]];
+  }
+  const visited = new Set();
+  visited.add(start);
+  for (let i = 0; i < connections.length; i++) {
+    const result = depthFirstSearch(connections[i], end, visited);
+    if (result.nodeToFind) {
+      const visitedArrray = Array.from(visited);
+      possibleCombinations.push(visitedArrray);
+    }
+  }
+  return possibleCombinations;
+};
+const getRoute = (start, end) => {
+  let result = "";
+  try {
+    let routes = findAllPosibleRoutes(start, end);
+    logger.info({ routes });
+    if (isValidArray(routes)) {
+      let min = routes[0];
+      for (let i = 1; i < routes.length; i++) {
+        if (routes[i].length < min.length) {
+          min = routes[i];
+        }
+      }
+      result = min.join("->");
+      logger.info({ result, min });
+    }
+  } catch (error) {
+    logger.error("Error while gettig routes -> ", error);
+  }
+  return result;
 };
 
-export { adjacencyList, addNode, addEdge, removeNode, depthFirstSearch };
+export {
+  adjacencyList,
+  addNode,
+  addEdge,
+  depthFirstSearch,
+  findAllPosibleRoutes,
+  getRoute,
+};
