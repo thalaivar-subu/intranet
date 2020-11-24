@@ -1,6 +1,7 @@
 import logger from "../../../utils/logger";
 import validateCreate from "./create";
 import validateFetch from "./fetch";
+import validateModify from "./modify";
 
 const ALLOWED_METHODS = ["CREATE", "FETCH", "MODIFY"];
 const ALLOWED_ROUTES = ["/connections", "/devices", "/info-routes"];
@@ -31,6 +32,8 @@ const ProcessRequestValidator = ({
         return validateCreate(requestRoute, requestData);
       case "FETCH":
         return validateFetch(requestRoute, requestData);
+      case "MODIFY":
+        return validateModify(requestRoute, requestData);
     }
     return validationResult;
   } catch (error) {

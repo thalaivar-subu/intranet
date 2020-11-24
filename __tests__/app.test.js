@@ -117,6 +117,45 @@ describe("Create Device Connection", () => {
   }
 });
 
+describe("Modify Strength", () => {
+  const testCases = [
+    {
+      input: `MODIFY /devices/A1/strength\ncontent-type : application/json\n{"value": "Helloworld"}`,
+      status: 400,
+      msg: "value should be an integer",
+    },
+    {
+      input: `MODIFY /devices/A10/strength\ncontent-type : application/json\n{"value": "Helloworld"}`,
+      status: 404,
+      msg: "Device Not Found",
+    },
+    {
+      input: `MODIFY /devices/A1/strength\ncontent-type : application/json\n{"value": 2}`,
+      status: 200,
+    },
+  ];
+  for (let i = 0; i < testCases.length; i++) {
+    const x = testCases[i];
+    it(`Modifying Strength -> ${x.input}`, async (done) => {
+      try {
+        const {
+          status: statusCode,
+          data: { msg: message },
+        } = await post(`${TEST_URL}/ajiranet/process`, x.input, {
+          headers: { "Content-Type": "text/plain" },
+        });
+        expect(statusCode).toBe(x.status);
+        if (x.msg) expect(message).toBe(x.msg);
+        done();
+      } catch (error) {
+        expect(error.response.status).toBe(x.status);
+        expect(error.response.data.msg).toBe(x.msg);
+        done();
+      }
+    });
+  }
+});
+
 describe("Fetch Route Info", () => {
   const testCases = [
     {

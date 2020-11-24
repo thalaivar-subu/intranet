@@ -1,6 +1,12 @@
 import { isValidObject } from "../../utils/common";
 import logger from "../../utils/logger";
-import { addEdge, addNode, adjacencyList, getRoute } from "./model";
+import {
+  addEdge,
+  addNode,
+  adjacencyList,
+  getRoute,
+  modifyStrength,
+} from "./model";
 
 const CreateDevice = ({ type, name }) => {
   let response = {};
@@ -104,7 +110,6 @@ const FetchRouteInfo = (requestRoute) => {
       };
     } else {
       const Route = getRoute(from, to);
-      logger.info({ Route, from, to, msg: `Route is ${Route}` });
       if (Route) {
         response = {
           status: 200,
@@ -121,8 +126,24 @@ const FetchRouteInfo = (requestRoute) => {
     logger.error("Error while fetching route info", error);
     response = { status: 500, msg: "Internal Server Error" };
   }
-  logger.info({ response });
   return response;
 };
 
-export { CreateDevice, CreateConnection, FetchRouteInfo };
+const ModifyDeviceStrength = (requestRoute, { value }) => {
+  let response = {};
+  try {
+    const paramString = requestRoute.replace("/devices/", "");
+    const [nodeToModify] = paramString.split("/");
+    modifyStrength(nodeToModify, parseInt(value));
+    response = {
+      status: 200,
+      msg: "Successfully defined strength",
+    };
+  } catch (error) {
+    logger.error("Error while modifying strength -> ", error);
+    response = { status: 500, msg: "Internal Server Error" };
+  }
+  return response;
+};
+
+export { CreateDevice, CreateConnection, FetchRouteInfo, ModifyDeviceStrength };

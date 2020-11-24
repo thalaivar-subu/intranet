@@ -2,13 +2,20 @@ import { isValidArray } from "../../utils/common";
 import logger from "../../utils/logger";
 
 const adjacencyList = new Map();
+const strengtList = new Map();
+
 const addNode = (v) => {
   adjacencyList.set(v, []);
+  strengtList.set(v, 5);
 };
+
 const addEdge = (from, to) => {
   if (!adjacencyList.get(from).includes(to)) adjacencyList.get(from).push(to);
   if (!adjacencyList.get(to).includes(from)) adjacencyList.get(to).push(from);
 };
+
+const modifyStrength = (node, strength) => strengtList.set(node, strength);
+
 const depthFirstSearch = (start, nodeToFind, visited = new Set()) => {
   visited.add(start);
   const destinations = adjacencyList.get(start);
@@ -24,6 +31,7 @@ const depthFirstSearch = (start, nodeToFind, visited = new Set()) => {
   }
   return {};
 };
+
 const findAllPosibleRoutes = (start, end) => {
   const possibleCombinations = [];
   const connections = adjacencyList.get(start);
@@ -45,7 +53,6 @@ const getRoute = (start, end) => {
   let result = "";
   try {
     let routes = findAllPosibleRoutes(start, end);
-    logger.info({ routes });
     if (isValidArray(routes)) {
       let min = routes[0];
       for (let i = 1; i < routes.length; i++) {
@@ -54,7 +61,6 @@ const getRoute = (start, end) => {
         }
       }
       result = min.join("->");
-      logger.info({ result, min });
     }
   } catch (error) {
     logger.error("Error while gettig routes -> ", error);
@@ -64,9 +70,11 @@ const getRoute = (start, end) => {
 
 export {
   adjacencyList,
+  strengtList,
   addNode,
   addEdge,
   depthFirstSearch,
   findAllPosibleRoutes,
   getRoute,
+  modifyStrength,
 };

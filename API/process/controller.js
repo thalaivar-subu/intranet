@@ -1,7 +1,12 @@
-import { parseJson } from "../../utils/common";
+import { isValidObject, parseJson } from "../../utils/common";
 import logger from "../../utils/logger";
 import ProcessRequestValidator from "./validator/validater";
-import { CreateDevice, CreateConnection, FetchRouteInfo } from "./service";
+import {
+  CreateDevice,
+  CreateConnection,
+  FetchRouteInfo,
+  ModifyDeviceStrength,
+} from "./service";
 import { adjacencyList } from "./model";
 
 const ProcessController = async (req, res) => {
@@ -15,6 +20,13 @@ const ProcessController = async (req, res) => {
     ] = requestParams;
     const [requestMethod, requestRoute] = requestInfo.split(" ");
     const requestData = parseJson(requestDataInfo);
+    logger.info({
+      request: {
+        requestRoute,
+        requestData,
+        requestMethod,
+      },
+    });
     // Request Validation
     const { isValid, status, message } = ProcessRequestValidator({
       contentInfo,
@@ -35,8 +47,7 @@ const ProcessController = async (req, res) => {
         if (requestRoute === "/connections") {
           response = CreateConnection(requestData);
         }
-      }
-      if (requestMethod === "FETCH") {
+      } else if (requestMethod === "FETCH") {
         if (requestRoute === "/devices") {
           response = {
             status: 200,
@@ -49,6 +60,16 @@ const ProcessController = async (req, res) => {
         if (requestRoute.startsWith("/info-routes")) {
           response = FetchRouteInfo(requestRoute);
         }
+      } else if (
+        requestMethod === "MODIFY" &&
+        requestRoute.startsWith("/devices")
+      ) {
+        response = ModifyDeviceStrength(requestRoute, requestData);
+      } else {
+        response = {
+          status: 404,
+          msg: "Request Method Not Allowed",
+        };
       }
     }
   } catch (error) {
@@ -58,10 +79,10 @@ const ProcessController = async (req, res) => {
       msg: "Internal Server Error",
     };
   }
-  if (response.msg) res.status(response.status).json({ msg: response.msg });
-  else if (response.devices) {
-    res.status(response.status).json({ devices: response.devices });
-  }
+  logger.info({ response });
+  const { status, devices, msg } = response;
+  let resultJson = devices ? { devices } : { msg };
+  res.status(status).json(resultJson);
 };
 
 export default ProcessController;
