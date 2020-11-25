@@ -1,4 +1,4 @@
-import { isValidObject, parseJson } from "../../utils/common";
+import { parseJson } from "../../utils/common";
 import logger from "../../utils/logger";
 import ProcessRequestValidator from "./validator/validater";
 import {
@@ -7,7 +7,7 @@ import {
   FetchRouteInfo,
   ModifyDeviceStrength,
 } from "./service";
-import { adjacencyList } from "./model";
+import Graph from "./model";
 
 const ProcessController = async (req, res) => {
   let response = {};
@@ -51,7 +51,7 @@ const ProcessController = async (req, res) => {
         if (requestRoute === "/devices") {
           response = {
             status: 200,
-            devices: Array.from(adjacencyList.keys(), (x) => ({
+            devices: Array.from(Graph.adjacencyList.keys(), (x) => ({
               name: x,
               type: x.startsWith("R") ? "REPEATER" : "COMPUTER",
             })),

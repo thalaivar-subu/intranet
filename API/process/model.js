@@ -1,80 +1,58 @@
-import { isValidArray } from "../../utils/common";
-import logger from "../../utils/logger";
-
-const adjacencyList = new Map();
-const strengtList = new Map();
-
-const addNode = (v) => {
-  adjacencyList.set(v, []);
-  strengtList.set(v, 5);
-};
-
-const addEdge = (from, to) => {
-  if (!adjacencyList.get(from).includes(to)) adjacencyList.get(from).push(to);
-  if (!adjacencyList.get(to).includes(from)) adjacencyList.get(to).push(from);
-};
-
-const modifyStrength = (node, strength) => strengtList.set(node, strength);
-
-const depthFirstSearch = (start, nodeToFind, visited = new Set()) => {
-  visited.add(start);
-  const destinations = adjacencyList.get(start);
-  for (const destination of destinations) {
-    if (destination === nodeToFind) {
-      visited.add(nodeToFind);
-      return { nodeToFind, visited };
-    }
-    if (!visited.has(destination)) {
-      const isFound = depthFirstSearch(destination, nodeToFind, visited);
-      if (isFound) return isFound;
-    }
+class Graph {
+  constructor() {
+    this.adjacencyList = new Map();
+    this.nodeInfo = new Map();
+    this.visited = new Set();
+    this.isFound = false;
   }
-  return {};
-};
-
-const findAllPosibleRoutes = (start, end) => {
-  const possibleCombinations = [];
-  const connections = adjacencyList.get(start);
-  if (start === end || connections.includes(end)) {
-    return [[start, end]];
+  addNode(v, type) {
+    this.adjacencyList.set(v, []);
+    this.nodeInfo.set(v, { strength: 5, type });
   }
-  const visited = new Set();
-  visited.add(start);
-  for (let i = 0; i < connections.length; i++) {
-    const result = depthFirstSearch(connections[i], end, visited);
-    if (result.nodeToFind) {
-      const visitedArrray = Array.from(visited);
-      possibleCombinations.push(visitedArrray);
+  addEdge(from, to) {
+    if (!this.adjacencyList.get(from).includes(to))
+      this.adjacencyList.get(from).push(to);
+    if (!this.adjacencyList.get(to).includes(from))
+      this.adjacencyList.get(to).push(from);
+  }
+  modifyStrength(node, strength) {
+    const nodeInfo = this.nodeInfo.get(node);
+    nodeInfo.strength = strength;
+    this.nodeInfo.set(node, nodeInfo);
+  }
+  clearVisited() {
+    this.visited = new Set();
+    this.isFound = false;
+  }
+  depthFirstSearch(start, nodeToFind, strength) {
+    if (strength <= 0) return;
+    this.visited.add(start);
+    const destinations = this.adjacencyList.get(start);
+    if (destinations.includes(nodeToFind)) {
+      this.visited.add(nodeToFind);
+      this.isFound = true;
+      return;
     }
-  }
-  return possibleCombinations;
-};
-const getRoute = (start, end) => {
-  let result = "";
-  try {
-    let routes = findAllPosibleRoutes(start, end);
-    if (isValidArray(routes)) {
-      let min = routes[0];
-      for (let i = 1; i < routes.length; i++) {
-        if (routes[i].length < min.length) {
-          min = routes[i];
-        }
+    for (let destination of destinations) {
+      if (!this.visited.has(destination)) {
+        const { type } = this.nodeInfo.get(destination);
+        const modifiedStrength =
+          type === "REPEATER" ? 2 * strength : strength - 1;
+        this.depthFirstSearch(destination, nodeToFind, modifiedStrength);
+        if (this.isFound) return;
       }
-      result = min.join("->");
     }
-  } catch (error) {
-    logger.error("Error while gettig routes -> ", error);
+    this.visited.delete(start);
   }
-  return result;
-};
+  getPath(start, nodeToFind) {
+    this.clearVisited();
+    if (start === nodeToFind) return `${start}->${nodeToFind}`;
+    const { strength } = this.nodeInfo.get(start);
+    this.depthFirstSearch(start, nodeToFind, strength);
+    return this.visited.size > 0 ? Array.from(this.visited).join("->") : "";
+  }
+}
 
-export {
-  adjacencyList,
-  strengtList,
-  addNode,
-  addEdge,
-  depthFirstSearch,
-  findAllPosibleRoutes,
-  getRoute,
-  modifyStrength,
-};
+const graph = new Graph();
+
+export default graph;

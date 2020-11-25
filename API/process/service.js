@@ -1,23 +1,16 @@
-import { isValidObject } from "../../utils/common";
 import logger from "../../utils/logger";
-import {
-  addEdge,
-  addNode,
-  adjacencyList,
-  getRoute,
-  modifyStrength,
-} from "./model";
+import Graph from "./model";
 
 const CreateDevice = ({ type, name }) => {
   let response = {};
   try {
-    if (adjacencyList.has(name)) {
+    if (Graph.adjacencyList.has(name)) {
       response = {
         status: 400,
         msg: `Device '${name}' already exists`,
       };
     } else {
-      addNode(name);
+      Graph.addNode(name, type);
       response = {
         status: 200,
         msg: `Successfully added ${name}`,
@@ -36,41 +29,37 @@ const CreateDevice = ({ type, name }) => {
 const CreateConnection = ({ source, targets }) => {
   let response = {};
   try {
-    if (!adjacencyList.has(source)) {
+    if (!Graph.adjacencyList.has(source)) {
       response = {
         status: 400,
         msg: `Node '${source}' not found`,
       };
     } else {
-      targets.map((x) => {
-        if (!adjacencyList.has(x)) {
+      for (let i = 0; i < targets.length; i++) {
+        const x = targets[i];
+        if (!Graph.adjacencyList.has(x)) {
           response = {
             status: 400,
             msg: `Target '${x}' not found`,
           };
-        }
-        if (adjacencyList.get(source).includes(x)) {
+        } else if (Graph.adjacencyList.get(source).includes(x)) {
           response = {
             status: 400,
             msg: "Devices are already connected",
           };
-        }
-        if (x === source) {
+        } else if (x === source) {
           response = {
             status: 400,
             msg: "Cannot connect device to itself",
           };
+        } else {
+          Graph.addEdge(source, x);
+          response = {
+            status: 200,
+            msg: "Successfully connected",
+          };
         }
-      });
-      targets.map((x) => {
-        addEdge(source, x);
-      });
-    }
-    if (!isValidObject(response)) {
-      response = {
-        status: 200,
-        msg: "Successfully connected",
-      };
+      }
     }
   } catch (error) {
     logger.error("Error while creating Connection", error);
@@ -93,23 +82,28 @@ const FetchRouteInfo = (requestRoute) => {
       queryParamMap[key] = value;
     });
     const { from, to } = queryParamMap;
-    if (!adjacencyList.has(from)) {
+    const fromNodeInfo = Graph.nodeInfo.get(from);
+    const toNodeInfo = Graph.nodeInfo.get(to);
+    if (!Graph.adjacencyList.has(from)) {
       response = {
         status: 400,
         msg: `Node '${from}' not found`,
       };
-    } else if (!adjacencyList.has(to)) {
+    } else if (!Graph.adjacencyList.has(to)) {
       response = {
         status: 400,
         msg: `Node '${to}' not found`,
       };
-    } else if (from.startsWith("R") || to.startsWith("R")) {
+    } else if (
+      fromNodeInfo.type === "REPEATER" ||
+      toNodeInfo.type === "REPEATER"
+    ) {
       response = {
-        status: 200,
+        status: 400,
         msg: "Route cannot be calculated with repeater",
       };
     } else {
-      const Route = getRoute(from, to);
+      const Route = Graph.getPath(from, to);
       if (Route) {
         response = {
           status: 200,
@@ -134,7 +128,7 @@ const ModifyDeviceStrength = (requestRoute, { value }) => {
   try {
     const paramString = requestRoute.replace("/devices/", "");
     const [nodeToModify] = paramString.split("/");
-    modifyStrength(nodeToModify, parseInt(value));
+    Graph.modifyStrength(nodeToModify, parseInt(value));
     response = {
       status: 200,
       msg: "Successfully defined strength",

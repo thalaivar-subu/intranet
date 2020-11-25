@@ -1,5 +1,4 @@
-import logger from "../../../utils/logger";
-import { adjacencyList } from "../model";
+import Graph from "../model";
 
 const validateModify = (requestRoute, requestData) => {
   let validationResult = { isValid: true };
@@ -7,7 +6,7 @@ const validateModify = (requestRoute, requestData) => {
     const { value } = requestData;
     const paramString = requestRoute.replace("/devices/", "");
     const [nodeToModify] = paramString.split("/");
-    if (!adjacencyList.has(nodeToModify)) {
+    if (!Graph.adjacencyList.has(nodeToModify)) {
       validationResult = {
         isValid: false,
         status: 404,
