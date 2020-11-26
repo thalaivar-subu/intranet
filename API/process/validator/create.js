@@ -4,7 +4,7 @@ const ALLOWED_DEVICE_TYPES = ["COMPUTER", "REPEATER"];
 const validateCreate = (requestRoute, requestData) => {
   let validationResult = { isValid: true };
   if (requestRoute === "/devices") {
-    if (!isValidObject(requestData) || !requestData.name) {
+    if (!(isValidObject(requestData) && requestData.name)) {
       validationResult = {
         isValid: false,
         status: 400,

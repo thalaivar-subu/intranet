@@ -17,9 +17,11 @@ const ProcessRequestValidator = ({
   try {
     const contentType = contentInfo ? contentInfo.split(" : ")[1] : "";
     if (
-      !ALLOWED_METHODS.find((x) => x === requestMethod) ||
-      !ALLOWED_ROUTES.find((x) => x.startsWith(requestRoute)) ||
-      !ALLOWED_CONTENT_TYPES.find((x) => x.startsWith(contentType))
+      !(
+        ALLOWED_METHODS.find((x) => x === requestMethod) &&
+        ALLOWED_ROUTES.find((x) => x.startsWith(requestRoute)) &&
+        ALLOWED_CONTENT_TYPES.find((x) => x.startsWith(contentType))
+      )
     ) {
       validationResult = {
         isValid: false,

@@ -53,7 +53,7 @@ const ProcessController = async (req, res) => {
             status: 200,
             devices: Array.from(Graph.adjacencyList().keys(), (x) => ({
               name: x,
-              type: x.startsWith("R") ? "REPEATER" : "COMPUTER",
+              type: Graph.getNodeInfo(x).type,
             })),
           };
         }

@@ -9,9 +9,11 @@ const validateFetch = (requestRoute) => {
       queryParamMap[key] = value;
     });
     if (
-      queryParams.length !== 2 ||
-      !Object.keys(queryParamMap).filter((x) => x === "from" || x === "to")
-        .length === 2
+      !(
+        queryParams.length === 2 &&
+        Object.keys(queryParamMap).filter((x) => x === "from" || x === "to")
+          .length === 2
+      )
     ) {
       validationResult = {
         isValid: false,

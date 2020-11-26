@@ -1,3 +1,4 @@
+import { isValidObject } from "../../utils/common";
 import logger from "../../utils/logger";
 import Graph from "./model";
 
@@ -35,30 +36,33 @@ const CreateConnection = ({ source, targets }) => {
         msg: `Node '${source}' not found`,
       };
     } else {
-      for (let i = 0; i < targets.length; i++) {
-        const x = targets[i];
+      for (let x of targets) {
         if (!Graph.adjacencyList().has(x)) {
           response = {
             status: 400,
             msg: `Target '${x}' not found`,
           };
+          break;
         } else if (Graph.adjacencyList().get(source).includes(x)) {
           response = {
             status: 400,
             msg: "Devices are already connected",
           };
+          break;
         } else if (x === source) {
           response = {
             status: 400,
             msg: "Cannot connect device to itself",
           };
-        } else {
-          Graph.addEdge(source, x);
-          response = {
-            status: 200,
-            msg: "Successfully connected",
-          };
+          break;
         }
+      }
+      if (!isValidObject(response)) {
+        targets.map((x) => Graph.addEdge(source, x));
+        response = {
+          status: 200,
+          msg: "Successfully connected",
+        };
       }
     }
   } catch (error) {
@@ -82,21 +86,17 @@ const FetchRouteInfo = (requestRoute) => {
       queryParamMap[key] = value;
     });
     const { from, to } = queryParamMap;
-    const fromNodeInfo = Graph.getNodeInfo(from);
-    const toNodeInfo = Graph.getNodeInfo(to);
-    if (!Graph.adjacencyList().has(from)) {
+    const hasFrom = Graph.adjacencyList().has(from);
+    const hasTo = Graph.adjacencyList().has(to);
+    if (!hasFrom || !hasTo) {
       response = {
         status: 400,
-        msg: `Node '${from}' not found`,
-      };
-    } else if (!Graph.adjacencyList().has(to)) {
-      response = {
-        status: 400,
-        msg: `Node '${to}' not found`,
+        msg: `Node '${!hasFrom ? from : to}' not found`,
       };
     } else if (
-      fromNodeInfo.type === "REPEATER" ||
-      toNodeInfo.type === "REPEATER"
+      [Graph.getNodeInfo(from).type, Graph.getNodeInfo(to).type].includes(
+        "REPEATER"
+      )
     ) {
       response = {
         status: 400,
