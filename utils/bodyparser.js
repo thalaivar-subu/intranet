@@ -1,4 +1,4 @@
-const bodyParser = (req, res, next) => {
+export default (req, res, next) => {
   req.setEncoding("utf8");
   let requestBody = "";
   req.on("data", function (chunk) {
@@ -9,4 +9,3 @@ const bodyParser = (req, res, next) => {
     next();
   });
 };
-export default bodyParser;

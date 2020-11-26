@@ -23,11 +23,10 @@ class Logger {
 
   // Our Custom Format of Logging
   logCustomFormat() {
-    return printf(({ level, message, label, timestamp, stack, ...info }) => {
-      const logContent = { timestamp, label, message };
-      if (isValidObject(info)) logContent.info = info;
-      if (level === "error") {
-        if (stack) logContent.stack = stack;
+    return printf(({ message, label, timestamp, stack, ...info }) => {
+      const logContent = { timestamp, label, message, stack };
+      if (isValidObject(info)) {
+        Object.keys(info).map((x) => (logContent[x] = info[x]));
       }
       return safeStringify(logContent);
     });
@@ -39,7 +38,7 @@ class Logger {
       this.#logger.add(
         new transports.Console({
           format: combine(
-            label({ label: APP_NAME }),
+            label({ label: this.APP_NAME }),
             timestamp(),
             this.logCustomFormat()
           ),

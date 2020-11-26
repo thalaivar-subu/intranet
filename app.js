@@ -52,5 +52,4 @@ class App {
     return this.app;
   }
 }
-
 new App({ APP_NAME, PORT }).getApp();

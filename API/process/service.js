@@ -82,8 +82,8 @@ const FetchRouteInfo = (requestRoute) => {
       queryParamMap[key] = value;
     });
     const { from, to } = queryParamMap;
-    const fromNodeInfo = Graph.nodeInfo().get(from);
-    const toNodeInfo = Graph.nodeInfo().get(to);
+    const fromNodeInfo = Graph.getNodeInfo(from);
+    const toNodeInfo = Graph.getNodeInfo(to);
     if (!Graph.adjacencyList().has(from)) {
       response = {
         status: 400,
