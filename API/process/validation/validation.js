@@ -2,10 +2,11 @@ import logger from "../../../utils/logger";
 import validateCreate from "./create";
 import validateFetch from "./fetch";
 import validateModify from "./modify";
-
-const ALLOWED_METHODS = ["CREATE", "FETCH", "MODIFY"];
-const ALLOWED_ROUTES = ["/connections", "/devices", "/info-routes"];
-const ALLOWED_CONTENT_TYPES = ["application/json"];
+import {
+  ALLOWED_METHODS,
+  ALLOWED_ROUTES,
+  ALLOWED_CONTENT_TYPES,
+} from "../../../lib/constants";
 
 const ProcessRequestValidator = ({
   requestMethod,

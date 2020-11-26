@@ -1,6 +1,6 @@
 import { parseJson } from "../../utils/common";
 import logger from "../../utils/logger";
-import ProcessRequestValidator from "./validator/validater";
+import ProcessRequestValidator from "./validation/validation";
 import {
   CreateDevice,
   CreateConnection,

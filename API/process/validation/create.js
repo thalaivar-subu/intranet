@@ -1,5 +1,5 @@
 import { isValidObject, isValidArray } from "../../../utils/common";
-const ALLOWED_DEVICE_TYPES = ["COMPUTER", "REPEATER"];
+import { ALLOWED_DEVICE_TYPES } from "../../../lib/constants";
 
 const validateCreate = (requestRoute, requestData) => {
   let validationResult = { isValid: true };
