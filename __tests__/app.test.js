@@ -171,7 +171,8 @@ describe("Fetch Route Info", () => {
     {
       input: "FETCH /info-routes?from=A4&to=A3",
       status: 200,
-      msg: "Route is A4->A2->A1->A3",
+      // msg: "Route is A4->A2->A1->A3",
+      msg: "Route is A4->A5->R1->A2->A1->A3",
     },
     {
       input: "FETCH /info-routes?from=A1&to=A1",
