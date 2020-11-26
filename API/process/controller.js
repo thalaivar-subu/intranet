@@ -51,7 +51,7 @@ const ProcessController = async (req, res) => {
         if (requestRoute === "/devices") {
           response = {
             status: 200,
-            devices: Array.from(Graph.adjacencyList.keys(), (x) => ({
+            devices: Array.from(Graph.adjacencyList().keys(), (x) => ({
               name: x,
               type: x.startsWith("R") ? "REPEATER" : "COMPUTER",
             })),

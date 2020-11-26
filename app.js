@@ -16,7 +16,7 @@ class App {
     this.app = express();
     this.addMiddlewares();
     this.addHealtCheck();
-    this.addRoutes()
+    this.addRoutes();
     this.app.listen(PORT, () => {
       logger.info(
         `${this.APP_NAME} app listening at http://localhost:${this.PORT}`

@@ -6,7 +6,7 @@ const validateModify = (requestRoute, requestData) => {
     const { value } = requestData;
     const paramString = requestRoute.replace("/devices/", "");
     const [nodeToModify] = paramString.split("/");
-    if (!Graph.adjacencyList.has(nodeToModify)) {
+    if (!Graph.adjacencyList().has(nodeToModify)) {
       validationResult = {
         isValid: false,
         status: 404,
