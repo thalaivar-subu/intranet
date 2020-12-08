@@ -128,7 +128,11 @@ const ModifyDeviceStrength = (requestRoute, { value }) => {
   try {
     const paramString = requestRoute.replace("/devices/", "");
     const [nodeToModify] = paramString.split("/");
-    Graph.modifyStrength(nodeToModify, parseInt(value));
+    Graph.modifyNode({
+      node: nodeToModify,
+      strength: parseInt(value),
+      fireWall: null,
+    });
     response = {
       status: 200,
       msg: "Successfully defined strength",
@@ -140,4 +144,33 @@ const ModifyDeviceStrength = (requestRoute, { value }) => {
   return response;
 };
 
-export { CreateDevice, CreateConnection, FetchRouteInfo, ModifyDeviceStrength };
+const ModifyDeviceFireWall = (requestRoute, { devices }) => {
+  let response;
+  try {
+    const paramString = requestRoute.replace("/devices/", "");
+    const [nodeToModify] = paramString.split("/");
+    Graph.modifyNode({
+      node: nodeToModify,
+      strength: null,
+      fireWall: devices,
+    });
+    response = {
+      status: 200,
+      msg: `Successfully Added devices -> ${devices.join(
+        ","
+      )} to firewall of ${nodeToModify}`,
+    };
+  } catch (error) {
+    logger.error("Error while modifying Firewall -> ", error);
+    response = { status: 500, msg: "Internal Server Error" };
+  }
+  return response;
+};
+
+export {
+  CreateDevice,
+  CreateConnection,
+  FetchRouteInfo,
+  ModifyDeviceStrength,
+  ModifyDeviceFireWall,
+};

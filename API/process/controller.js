@@ -6,6 +6,7 @@ import {
   CreateConnection,
   FetchRouteInfo,
   ModifyDeviceStrength,
+  ModifyDeviceFireWall,
 } from "./service";
 import Graph from "./model";
 
@@ -73,9 +74,14 @@ const ProcessController = async (req, res) => {
         }
       } else if (
         requestMethod === "MODIFY" &&
-        requestRoute.startsWith("/devices")
+        (requestRoute.startsWith("/firewall") ||
+          requestRoute.startsWith("/devices"))
       ) {
-        response = ModifyDeviceStrength(requestRoute, requestData);
+        if (requestRoute.includes("/firewall")) {
+          response = ModifyDeviceFireWall(requestRoute, requestData);
+        } else if (requestRoute.startsWith("/devices")) {
+          response = ModifyDeviceStrength(requestRoute, requestData);
+        }
       } else {
         response = {
           status: 404,

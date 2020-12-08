@@ -265,3 +265,68 @@ describe("Fetch Route Info", () => {
     done();
   });
 });
+
+describe("Modify FireWall", () => {
+  const testCases = [
+    {
+      input: `MODIFY /devices/A2/firewall\ncontent-type : application/json\n\n{"devices": ["A1"]}`,
+      status: 200,
+      msg: "Successfully Added devices -> A1 to firewall of A2",
+    },
+  ];
+  for (let i = 0; i < testCases.length; i++) {
+    const x = testCases[i];
+    it(`Modifying Firewall -> ${x.input}`, async (done) => {
+      try {
+        const {
+          status: statusCode,
+          data: { msg: message },
+        } = await post(`${TEST_URL}/ajiranet/process`, x.input, {
+          headers: { "Content-Type": "text/plain" },
+        });
+        expect(statusCode).toBe(x.status);
+        if (x.msg) expect(message).toBe(x.msg);
+        done();
+      } catch (error) {
+        expect(error.response.status).toBe(x.status);
+        expect(error.response.data.msg).toBe(x.msg);
+        done();
+      }
+    });
+  }
+});
+
+describe("Fetch Route Info After FireWall", () => {
+  const testCases = [
+    {
+      input: "FETCH /info-routes?from=A1&to=A5",
+      status: 404,
+      msg: "Route not found",
+    },
+    {
+      input: "FETCH /info-routes?from=A5&to=A1",
+      status: 200,
+      msg: "Route is A5->A4->A2->A1",
+    },
+  ];
+  for (let i = 0; i < testCases.length; i++) {
+    const x = testCases[i];
+    it(`Fetching Route Info for ${x.input}`, async (done) => {
+      try {
+        const {
+          status: statusCode,
+          data: { msg: message },
+        } = await post(`${TEST_URL}/ajiranet/process`, x.input, {
+          headers: { "Content-Type": "text/plain" },
+        });
+        expect(statusCode).toBe(x.status);
+        expect(message).toBe(x.msg);
+        done();
+      } catch (error) {
+        expect(error.response.status).toBe(x.status);
+        expect(error.response.data.msg).toBe(x.msg);
+        done();
+      }
+    });
+  }
+});

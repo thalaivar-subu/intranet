@@ -5,15 +5,21 @@ class Graph {
   static #nodeInfo = new Map();
   static addNode(v, type) {
     this.#adjacencyList.set(v, []);
-    this.setNodeInfo(v, { strength: 5, type });
+    this.setNodeInfo(v, { strength: 5, type, fireWall: [] });
   }
   static addEdge(from, to) {
     this.#adjacencyList.get(from).push(to);
     this.#adjacencyList.get(to).push(from);
   }
-  static modifyStrength(node, strength) {
-    const { type } = this.getNodeInfo(node);
-    this.setNodeInfo(node, { type, strength });
+  static modifyNode({ node, strength, fireWall }) {
+    const {
+      type,
+      strength: existingStrength,
+      fireWall: existingFireWall = [],
+    } = this.getNodeInfo(node);
+    strength = strength || existingStrength;
+    fireWall = fireWall || existingFireWall;
+    this.setNodeInfo(node, { type, strength, fireWall });
   }
   static clearVisited() {
     this.#visited = new Set();
@@ -29,8 +35,8 @@ class Graph {
       return;
     }
     for (let destination of destinations) {
-      if (!this.#visited.has(destination)) {
-        const { type } = this.getNodeInfo(destination);
+      const { type, fireWall } = this.getNodeInfo(destination);
+      if (!fireWall.includes(start) && !this.#visited.has(destination)) {
         const modifiedStrength =
           type === "REPEATER" ? 2 * strength : strength - 1;
         this.depthFirstSearch(destination, nodeToFind, modifiedStrength);
@@ -44,7 +50,9 @@ class Graph {
     if (start === nodeToFind) return `${start}->${nodeToFind}`;
     const { strength } = this.getNodeInfo(start);
     this.depthFirstSearch(start, nodeToFind, strength);
-    return this.#visited.size > 0 ? Array.from(this.#visited).join("->") : "";
+    const path =
+      this.#visited.size > 0 ? Array.from(this.#visited).join("->") : "";
+    return path;
   }
   static adjacencyList() {
     return this.#adjacencyList;
@@ -54,6 +62,9 @@ class Graph {
   }
   static getNodeInfo(name) {
     return this.#nodeInfo.get(name);
+  }
+  static nodeInfo() {
+    return this.#nodeInfo;
   }
 }
 
