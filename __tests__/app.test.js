@@ -32,7 +32,7 @@ describe("Create Device Test Cases", () => {
           data: { msg: message },
         } = await post(
           `${TEST_URL}/ajiranet/process`,
-          `CREATE /devices\ncontent-type : application/json\n{"type" : "${x.type}", "name" : "${x.name}"}`,
+          `CREATE /devices\ncontent-type : application/json\n\n{"type" : "${x.type}", "name" : "${x.name}"}`,
           { headers: { "Content-Type": "text/plain" } }
         );
         expect(statusCode).toBe(x.status);
@@ -50,47 +50,47 @@ describe("Create Device Test Cases", () => {
 describe("Create Device Connection", () => {
   const testCases = [
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "A1", "targets" : ["A2", "A3"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "A1", "targets" : ["A2", "A3"]}`,
       status: 200,
       msg: "Successfully connected",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "A1", "targets" : ["A1"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "A1", "targets" : ["A1"]}`,
       status: 400,
       msg: "Cannot connect device to itself",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "A1", "targets" : ["A2"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "A1", "targets" : ["A2"]}`,
       status: 400,
       msg: "Devices are already connected",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "A5", "targets" : ["A4"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "A5", "targets" : ["A4"]}`,
       status: 200,
       msg: "Successfully connected",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "R1", "targets" : ["A2"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "R1", "targets" : ["A2"]}`,
       status: 200,
       msg: "Successfully connected",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "R1", "targets" : ["A5"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "R1", "targets" : ["A5"]}`,
       status: 200,
       msg: "Successfully connected",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "R1"}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "R1"}`,
       status: 400,
       msg: "Invalid command syntax",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "A8", "targets" : ["A1"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "A8", "targets" : ["A1"]}`,
       status: 400,
       msg: "Node 'A8' not found",
     },
     {
-      input: `CREATE /connections\ncontent-type : application/json\n{"source" : "A2", "targets" : ["A4"]}`,
+      input: `CREATE /connections\ncontent-type : application/json\n\n{"source" : "A2", "targets" : ["A4"]}`,
       status: 200,
       msg: "Successfully connected",
     },
@@ -120,17 +120,17 @@ describe("Create Device Connection", () => {
 describe("Modify Strength", () => {
   const testCases = [
     {
-      input: `MODIFY /devices/A1/strength\ncontent-type : application/json\n{"value": "Helloworld"}`,
+      input: `MODIFY /devices/A1/strength\ncontent-type : application/json\n\n{"value": "Helloworld"}`,
       status: 400,
       msg: "value should be an integer",
     },
     {
-      input: `MODIFY /devices/A10/strength\ncontent-type : application/json\n{"value": "Helloworld"}`,
+      input: `MODIFY /devices/A10/strength\ncontent-type : application/json\n\n{"value": "Helloworld"}`,
       status: 404,
       msg: "Device Not Found",
     },
     {
-      input: `MODIFY /devices/A1/strength\ncontent-type : application/json\n{"value": 2}`,
+      input: `MODIFY /devices/A1/strength\ncontent-type : application/json\n\n{"value": 2}`,
       status: 200,
     },
   ];

@@ -1,4 +1,4 @@
-import { parseJson } from "../../utils/common";
+import { parseJson, parseUrlEncodedString } from "../../utils/common";
 import logger from "../../utils/logger";
 import ProcessRequestValidator from "./validation/validation";
 import {
@@ -16,10 +16,21 @@ const ProcessController = async (req, res) => {
     const [
       requestInfo = "",
       contentInfo = "",
+      // eslint-disable-next-line no-unused-vars
+      nilInfo = "",
       requestDataInfo = "",
     ] = requestParams;
     const [requestMethod, requestRoute] = requestInfo.split(" ");
-    const requestData = parseJson(requestDataInfo);
+    const contentType = contentInfo ? contentInfo.split(" : ")[1] : "";
+    let requestData = {};
+    switch (contentType) {
+      case "application/json":
+        requestData = parseJson(requestDataInfo);
+        break;
+      case "application/x-www-form-urlencoded":
+        requestData = parseUrlEncodedString(requestDataInfo);
+        break;
+    }
     logger.info({
       request: {
         requestRoute,
